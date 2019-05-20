@@ -1,0 +1,42 @@
+pipeline {
+    agent {
+        dockerfile {
+            filename 'Dockerfile'
+            dir './mysite'
+			label env.docker_image_name
+        }
+    }
+    stages {
+        stage('Static Analysis') {
+            steps {
+                        dir('mysite') {
+                            script {
+                                bat 'pip3.6 install -r requirements.txt'
+                                bat 'python3.6 manage.py migrate'
+                                bat 'python3.6 manage.py jenkins --enable-coverage || true'
+                            }
+                            step([
+                                $class: 'WarningsPublisher',
+                                parserConfigurations: [
+                                    [parserName: 'Pep8',
+                                    pattern: '**/reports/*.report']
+                                ]
+                            ])
+                            step([
+                                $class: 'CoberturaPublisher',
+                                autoUpdateHealth: false,
+                                autoUpdateStability: false,
+                                coberturaReportFile: '**/reports/coverage.xml',
+                                failUnhealthy: false,
+                                failUnstable: false,
+                                maxNumberOfBuilds: 0,
+                                onlyStable: false,
+                                zoomCoverageChart: false
+                            ])
+                            junit '**/reports/junit.xml'
+                            stepcounter settings: [[encoding: 'UTF-8', filePattern: 'mysite/*.py,polls/*.py', filePatternExclude: 'polls/migrations/*,polls/tests.py', key: 'SourceCode'], [encoding: 'UTF-8', filePattern: 'polls/tests.py', key: 'TestCode']]
+                        }
+            }
+        }
+    }
+}

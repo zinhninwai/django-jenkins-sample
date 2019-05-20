@@ -1,0 +1,4 @@
+Django==2.1.4
+django-jenkins==0.110.0
+pep8==1.7.1
+coverage==4.5.2
