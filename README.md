@@ -31,5 +31,4 @@ python manage.py runserver
 
 > Enjoy the Django2.0
 
-<div align=right>谢谢阅读</div>
 <div align=right>Thanks for watching</div>
